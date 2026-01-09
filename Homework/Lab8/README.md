@@ -17,32 +17,26 @@
 R1 | G0/0/0 | 10.0.0.1 | 255.255.255.252 | 
 R1 | G0/0/1 | - | - | -
 R1 | G0/0/1.100 | 192.168.1.1 | 255.255.255.192 | -
-R1 | G0/0/1.200 | 192.168.1.65 | 255.255.255.224 |
-R1 | G0/0/1.1000 |  |  |
-R2 | G0/0/0 | 10.0.0.2 | 255.255.255.252 |
+R1 | G0/0/1.200 | 192.168.1.65 | 255.255.255.224 | -
+R1 | G0/0/1.1000 | - | - | -
+R2 | G0/0/0 | 10.0.0.2 | 255.255.255.252 | -
 R2 | G0/0/1 | 192.168.1.97 | 255.255.255.240 | -
 S1 | VLAN 200 | 192.168.1.66 | 255.255.255.224 | 192.168.1.65
 S2 | VLAN 1 | 192.168.1.98 | 255.255.255.240 | 192.168.1.97
 PC-A | NIC | DHCP | DHCP | DHCP
 PC-B | NIC | DHCP | DHCP | DHCP
 
-192.168.1.0/26(255.255.255.192) 62 адреса  
-первый хост 192.168.1.1  
-192.168.1.64/27(255.255.255.224) 30 адресов  
-первый хост 192.168.1.65  
-192.168.1.96/28 14 адресов  
-первый хост 192.168.1.97  
 
 ⦁	Настройка маршрутизации между сетями VLAN на маршрутизаторе R1  
 ```
 R1#sh ip interface brief 
-Interface              IP-Address      OK? Method Status                Protocol 
-GigabitEthernet0/0/0   unassigned      YES unset  administratively down down 
-GigabitEthernet0/0/1   unassigned      YES unset  up                    up 
-GigabitEthernet0/0/1.100192.168.1.1     YES manual up                    up 
-GigabitEthernet0/0/1.200192.168.1.65    YES manual up                    up 
-GigabitEthernet0/0/1.1000unassigned      YES unset  up                    up 
-Vlan1                  unassigned      YES unset  administratively down down
+Interface               IP-Address      OK? Method Status                Protocol 
+GigabitEthernet0/0/0    unassigned      YES unset  administratively down down 
+GigabitEthernet0/0/1    unassigned      YES unset  up                    up 
+GigabitEthernet0/0/1.100 192.168.1.1     YES manual up                    up 
+GigabitEthernet0/0/1.200 192.168.1.65    YES manual up                    up 
+GigabitEthernet0/0/1.1000 unassigned      YES unset  up                    up 
+Vlan1                   unassigned      YES unset  administratively down down
 ```
 
 ⦁	Настройте G0/1 на R2, затем G0/0/0 и статическую маршрутизацию для обоих маршрутизаторов   
@@ -50,8 +44,9 @@ Vlan1                  unassigned      YES unset  administratively down down
 
 ```
 R1(config)#ip route 0.0.0.0 0.0.0.0 10.0.0.2
-R2(config)#ip route 0.0.0.0 0.0.0.0 10.0.0.1
-```  
+R2(config)#ip route 0.0.0.0 0.0.0.0 10.0.0.1   
+```
+Пинг: 
 ![](Ping_Static.png)    
 
 
@@ -91,7 +86,7 @@ Vlan200                192.168.1.66    YES manual up                    down
 S1#
 ```  
 
-Почему интерфейс F0/5 указан в VLAN 1?
+Почему интерфейс F0/5 указан в VLAN 1?  
 *- Vlan 1 является default Vlan и мы не настраивали порт в статическом режиме или режиме trunk*  
 
 
@@ -106,8 +101,9 @@ S1(config-if)#switchport trunk allowed vlan 100,200,1000
 S1(config-if)#
 ```
 
-Какой IP-адрес был бы у ПК, если бы он был подключен к сети с помощью DHCP?
-*- Следующий свободный адрес в подсети 192.168.1.1/28, то есть **192.168.1.2***   
+Какой IP-адрес был бы у ПК, если бы он был подключен к сети с помощью DHCP?  
+*- Скорее всего следующий свободный адрес в подсети 192.168.1.1/28, то есть **192.168.1.2**  
+Но возможно DHCP запрос попытался бы взять уже занятый адрес..*   
 
 
 #### Часть 2. Настройка и проверка двух серверов DHCPv4 на R1  
@@ -157,7 +153,7 @@ R1#sh ip dhcp ?
 
 ⦁	Попытка получить IP-адрес от DHCP на PC-A  
 ![](PCA_DHCP.png)   
-
+Проверка:  
 ![](PCA_Ping.png)  
 
 ⦁	Настройка и проверка DHCP-ретрансляции на R2  
@@ -167,7 +163,7 @@ R2(config-if)#ip helper-address 10.0.0.1
 ```
 ⦁	Попытка получить IP-адрес от DHCP на PC-B
 ![](PCB_DHCP.png)   
-
+Проверка:  
 ![](PCB_Ping.png)    
 
 ⦁	Выполните show ip dhcp binding  
