@@ -110,4 +110,72 @@ S1(config-if)#
 *- Следующий свободный адрес в подсети 192.168.1.1/28, то есть **192.168.1.2***   
 
 
-#### Часть 2. Настройка и проверка двух серверов DHCPv4 на R1
+#### Часть 2. Настройка и проверка двух серверов DHCPv4 на R1  
+⦁	Настройте R1 с пулами DHCPv4 для двух поддерживаемых подсетей.   
+! В PT на роутере 4321 нет возможности настроить время аренды, комнада leasing неизвестна.
+![](R1_Conf_DHCP.png)     
+
+
+⦁	Проверка конфигурации сервера DHCPv4  
+! В PT на роутере 4321 нет возможности выполнить команду show ip dhcp server statistics.  
+```
+R1#sh ip dhcp pool 
+Pool Client :
+ Utilization mark (high/low)    : 100 / 0
+ Subnet size (first/next)       : 0 / 0 
+ Total addresses                : 62
+ Leased addresses               : 1
+ Excluded addresses             : 2
+ Pending event                  : none
+
+ 1 subnet is currently in the pool
+ Current index        IP address range                    Leased/Excluded/Total
+ 192.168.1.1          192.168.1.1      - 192.168.1.62      0    / 2     / 62
+
+Pool R2_Client_LAN :
+ Utilization mark (high/low)    : 100 / 0
+ Subnet size (first/next)       : 0 / 0 
+ Total addresses                : 14
+ Leased addresses               : 0
+ Excluded addresses             : 2
+ Pending event                  : none
+
+ 1 subnet is currently in the pool
+ Current index        IP address range                    Leased/Excluded/Total
+ 192.168.1.97         192.168.1.97     - 192.168.1.110     0    / 2     / 14
+R1#
+R1#sh ip dhcp binding 
+IP address       Client-ID/              Lease expiration        Type
+                 Hardware address
+R1#
+R1#sh ip dhcp ?
+  binding   DHCP address bindings
+  conflict  DHCP address conflicts
+  pool      DHCP pools information
+  relay     Miscellaneous DHCP relay information
+```
+
+⦁	Попытка получить IP-адрес от DHCP на PC-A  
+![](PCA_DHCP.png)   
+
+![](PCA_Ping.png)  
+
+⦁	Настройка и проверка DHCP-ретрансляции на R2  
+```
+R2(config)#interface gigabitEthernet 0/0/1
+R2(config-if)#ip helper-address 10.0.0.1
+```
+⦁	Попытка получить IP-адрес от DHCP на PC-B
+![](PCB_DHCP.png)   
+
+![](PCB_Ping.png)    
+
+⦁	Выполните show ip dhcp binding  
+```
+R1#sh ip dhcp binding 
+IP address       Client-ID/              Lease expiration        Type
+                 Hardware address
+192.168.1.7      0040.0BC8.A015           --                     Automatic
+192.168.1.102    0010.113D.083B           --                     Automatic
+R1#
+```
