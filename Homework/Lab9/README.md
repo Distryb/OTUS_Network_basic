@@ -73,7 +73,12 @@ S1(config)#interface fastEthernet 0/1
 S1(config-if)#switchport nonegotiate
 S1(config-if)#do sh interfaces fastEthernet 0/1 switchport | include Negot
 Negotiation of Trunking: Off
-```  
+```
+
+⦁	Настройка портов доступа  
+⦁	Безопасность неиспользуемых портов коммутатора  
+
+![](Sh_int_stat.png)
 
 ### Документирование и реализация функций безопасности порта.  
 Функция | Настройка по умолчанию
